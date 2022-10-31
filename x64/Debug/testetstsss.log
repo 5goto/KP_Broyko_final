@@ -1,0 +1,11 @@
+﻿  CppCLR_WinformsProjekt.cpp
+D:\3 курс\долги\Бройко\Course_Broyko_final\main_classes.h(19,42): warning C4552: "+": результат выражения не используется
+D:\3 курс\долги\Бройко\Course_Broyko_final\Form1.h(392,1): warning C4305: аргумент: усечение из "double" в "float"
+D:\3 курс\долги\Бройко\Course_Broyko_final\Form1.h(657,1): warning C4305: аргумент: усечение из "double" в "float"
+D:\3 курс\долги\Бройко\Course_Broyko_final\Form1.h(908,1): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+D:\3 курс\долги\Бройко\Course_Broyko_final\Form1.h(960,1): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+D:\3 курс\долги\Бройко\Course_Broyko_final\hash_table_class.h(83): warning C4715: SimpleHashTable<Performance *>::NodeIterator<SimpleHashTable<Performance *>::cell>::operator++: значение возвращается не при всех путях выполнения
+D:\3 курс\долги\Бройко\Course_Broyko_final\tree_class.h(361): warning C4715: BTree<Production *>::tree_search: значение возвращается не при всех путях выполнения
+D:\3 курс\долги\Бройко\Course_Broyko_final\tree_class.h(368): warning C4172: возвращение адреса локальной или временной переменной : items
+  AssemblyInfo.obj : обнаружен модуль MSIL; для MSIL последовательная компоновка отключена; выполняется полная компоновка
+  testetstsss.vcxproj -> D:\3 курс\долги\Бройко\Course_Broyko_final\x64\Debug\ProjectTest.exe

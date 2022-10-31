@@ -232,18 +232,23 @@ public:
 			if (search_index(item) != -1)
 				return -1; // ключ не уникален
 
+			hash_function_objects_names.push_back(item->get_title());
+
 			int key = mod_hash_function((int)*item);
+			hash_function_keys.push_back(key);
 			if (!is_that_cell_is_free(key))
 			{
 				int correct_key = collision(key);
 				table[correct_key].data = item;
 				table[correct_key].cell_status = status::occupied;
+				hash_function_keys.push_back(correct_key);
 				return correct_key;
 			}
 			else
 			{
 				table[key].data = item;
 				table[key].cell_status = status::occupied;
+				hash_function_keys.push_back(key);
 				return key;
 			}
 			return 0;

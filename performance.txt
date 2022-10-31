@@ -1,0 +1,10 @@
+TestName1 Genre1 70
+TestName2 Genre2 46
+TestName3 Genre1 71
+TestName4 Genre2 100
+TestName5 Genre3 55
+TestName6 Genre1 70
+TestName7 Genre2 49
+TestName8 Genre1 73
+TestName9 Genre2 105
+TestName10 Genre3 58

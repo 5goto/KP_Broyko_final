@@ -32,7 +32,7 @@
     <ClInclude Include="hash_table_class.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
-    <ClInclude Include="manga_classes.h">
+    <ClInclude Include="main_classes.h">
       <Filter>Headerdateien</Filter>
     </ClInclude>
     <ClInclude Include="init_mod.h">

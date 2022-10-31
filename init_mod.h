@@ -1,5 +1,5 @@
 #pragma once
-#include "manga_classes.h"
+#include "main_classes.h"
 #include "hash_table_class.h"
 #include "tree_class.h"
 #include <fstream>
@@ -29,17 +29,17 @@ protected:
 };
 
 
-class Init_Favorites_Data_Base : Init_From_File<Favorites*>
+class Init_Production_Data_Base : Init_From_File<Production*>
 {
     string data_base_name;
 
 public:
-    Init_Favorites_Data_Base(string data_base_n = "favourites.txt") : data_base_name{ data_base_n } {}
-    BTree<Favorites*>* Init_Data_Base()
+    Init_Production_Data_Base(string data_base_n = "production.txt") : data_base_name{ data_base_n } {}
+    BTree<Production*>* Init_Data_Base()
     {
         string tmp; // для временного хранения строки
         vector<string> splitted_line; // вектор полей структуры
-        BTree<Favorites*>* data_base = new BTree<Favorites*>;
+        BTree<Production*>* data_base = new BTree<Production*>;
         ifstream file_for_input(data_base_name);
 
 
@@ -47,8 +47,8 @@ public:
         {
             splitted_line = str_split_by_one_space(tmp);
 
-            Favorites* tmp_struct = new Favorites{ splitted_line[0], splitted_line[1],
-               stoi(splitted_line[2]) }; // инициализация полей структуры
+            Production* tmp_struct = new Production{ {stoi(splitted_line[0]), stoi(splitted_line[1]),
+              stoi(splitted_line[2])}, splitted_line[3], stoi(splitted_line[4]) }; // инициализация полей структуры
             data_base->additem(tmp_struct);
         }
         file_for_input.close();
@@ -56,7 +56,7 @@ public:
     }
 };
 
-class Init_Manga_Data_Base : Init_From_File<Manga*>
+class Init_Performance_Data_Base : Init_From_File<Performance*>
 {
     string data_base_name;
     int size_of_base;
@@ -68,9 +68,9 @@ class Init_Manga_Data_Base : Init_From_File<Manga*>
         }
         return true;
     }
-    int culculate_base_size(string data_base = "manga.txt")
+    int culculate_base_size(string data_base = "performance.txt")
     {
-        ifstream file_for_input("manga.txt");
+        ifstream file_for_input("performance.txt");
         string tmp;
         int counter{};
         while (getline(file_for_input, tmp))
@@ -90,8 +90,8 @@ class Init_Manga_Data_Base : Init_From_File<Manga*>
 
 public:
 
-    Init_Manga_Data_Base(string data_base = "manga.txt") : data_base_name{ data_base }, size_of_base{} {}
-    SimpleHashTable<Manga*>* Init_Data_Base(int& t_size)
+    Init_Performance_Data_Base(string data_base = "performance.txt") : data_base_name{ data_base }, size_of_base{} {}
+    SimpleHashTable<Performance*>* Init_Data_Base(int& t_size)
     {
 
         //size_of_base = culculate_base_size();
@@ -99,14 +99,14 @@ public:
         t_size = size_of_base;
         string tmp; // для временного хранения строки
         vector<string> splitted_line; // вектор полей структуры
-        SimpleHashTable<Manga*>* data_base = new  SimpleHashTable<Manga*>{ size_of_base };
-        ifstream file_for_input("manga.txt");
+        SimpleHashTable<Performance*>* data_base = new SimpleHashTable<Performance*>{ size_of_base };
+        ifstream file_for_input("performance.txt");
 
         while (getline(file_for_input, tmp))
         {
             splitted_line = str_split_by_one_space(tmp);
 
-            Manga* tmp_struct = new Manga{ splitted_line[1], splitted_line[0],
+            Performance* tmp_struct = new Performance{ splitted_line[0], splitted_line[1],
                stoi(splitted_line[2]) }; // инициализация полей структуры
             data_base->add_element(tmp_struct);
         }

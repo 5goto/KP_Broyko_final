@@ -4,11 +4,9 @@
 #include <exception>
 #include <type_traits>
 #include <vector>
-#include "manga_classes.h"
+#include "main_classes.h"
 
 using namespace std;
-
-
 
 
 //  объекты с одинаковым статусом хранятся в одном узле
@@ -179,6 +177,18 @@ private: void delete_from_three(node* z)
     }
 }
 
+private: node* search(T data, node* x, int& comprassions) // поиск нужного узла в дереве
+{
+    while (x != NULL && ((int)(*data) != (int)(*x->num)))
+    {
+        comprassions++;
+        if ((int)(*data) < (int)(*x->num))
+            x = x->left;
+        else x = x->right;
+    }
+    return x;
+}
+
 private: node* search(T data, node* x) // поиск нужного узла в дереве
 {
     while (x != NULL && ((int)(*data) != (int)(*x->num)))
@@ -188,6 +198,12 @@ private: node* search(T data, node* x) // поиск нужного узла в дереве
         else x = x->right;
     }
     return x;
+}
+
+public: node* search_wrap(T data, int& comprassions) // обертка для фыункции поиска
+{
+    node* x = root;
+    return search(data, x, comprassions);
 }
 
 public: node* search_wrap(T data) // обертка для фыункции поиска
@@ -315,24 +331,34 @@ public:  auto searchOrderTraversWrapper(string name)
           }
       }
 
-            public: auto tree_search(T object)
-             {
-                 node* head = root;
-                 if (head != NULL)
-                 {
-                     while (head != nullptr)
-                     {
-                         if (*head->num == *object)
-                             return true;
-                         else if (*head->num < *object)
-                             head = head->right;
-                         else
-                             head = head->left;
-                     }
-                 }
-                 else
-                     return false;
-             }
+    public: auto tree_search(T object)
+	{
+		node* head = root;
+		if (head != NULL)
+		{
+			while (head != nullptr)
+			{
+                if (head->num->get_date() == object->get_date())
+                {
+                    node* tmp = head;
+                    while (tmp != nullptr)
+                    {
+                        if (*tmp->num == *object)
+                            return true;
+                        else
+                            tmp = tmp->next;
+                    }
+                    return false;
+                }
+				else if (*head->num < *object)
+					head = head->right;
+				else
+					head = head->left;
+			}
+		}
+		else
+			return false;
+	}
 
      public: vector<T>*& get_all_items()
       {
