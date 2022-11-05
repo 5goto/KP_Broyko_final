@@ -8,6 +8,9 @@
 vector<int> hash_function_keys;
 vector<string> hash_function_objects_names;
 
+vector<vector<int>> tree_function_keys;
+vector<string> tree_function_objects_names;
+
 class Interface // Паттерн фасад для усправления основными сущностями
 {
 	BTree<Production*>* production_data_base; 
@@ -64,6 +67,9 @@ public:
 	}*/
 	vector<int> get_initialize_hash_keys() { return hash_function_keys; }
 	vector<string> get_initialize_hash_objects_names() { return hash_function_objects_names; }
+
+	vector<vector<int>> get_tree_keys() { return tree_function_keys; }
+	vector<string> get_tree_names() { return tree_function_objects_names; }
 
 	auto find_object_in_tree(int day, int mounth, int year, string name, int price)
 	{

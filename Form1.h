@@ -1002,6 +1002,21 @@ private:
 			name_counter++;
 		}
 
+		auto tree_paths = test.get_tree_keys();
+		auto tree_names = test.get_tree_names();
+
+		for (auto counter = 0; counter < tree_paths.size(); counter++)
+		{
+			auto str_e = gcnew System::String(tree_names[counter].c_str());
+			auto full_tree_path = str_e + ") Путь: ";
+			for (auto item : tree_paths[counter])
+				full_tree_path += (item.ToString() + ">>> ");
+			TreeLogBox->Rows[tree_log_counter]->Cells[0]->Value = full_tree_path;
+			tree_log_counter++;
+		}
+
+
+
 
 		MessageBox::Show("Вместимость таблицы: " + test.get_hash_table_size() + " записей", "Создание хэш таблицы");
 	}
@@ -1039,6 +1054,13 @@ private:
 			}
 			tmp_title = tmp_title + " ";
 			tmp_genre = tmp_genre + " ";
+
+
+			if (check_in_table(tmp_title))
+			{
+				MessageBox::Show("Введите уникальный ключ", "Вставка в таблицу");
+				return;
+			}
 
 			
 			auto operation_result = test.insert_element_to_performance_data_base(tmp_title, tmp_genre, duration);
@@ -1157,7 +1179,7 @@ private:
 
 			auto full_tree_path = name + ") Путь: ";
 			for (auto item : *tree_path)
-				full_tree_path += (item + " -> ");
+				full_tree_path += (item + ">>> ");
 			// обновление данных в форме
 			TreeLogBox->Rows[tree_log_counter]->Cells[0]->Value = full_tree_path;
 			tree_log_counter++;

@@ -115,6 +115,8 @@ public:
         vector<int>* path{ new vector<int> };
         node* new_node = new node(n);
         insert(new_node, path);
+        tree_function_keys.push_back(*path);
+        tree_function_objects_names.push_back(n->get_name());
         return path;
     }
 
