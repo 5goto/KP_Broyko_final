@@ -130,8 +130,15 @@ public: int search_index(T item)
 			return false;
 	}
 
-	auto mod_hash_function(int key)
+	auto mod_hash_function(int value)
 	{
+		int tmp = value;
+		int key = 0;
+		while (tmp != 0)
+		{
+			key += tmp % 100;
+			tmp = tmp / 100;
+		}
 		return key % size;
 	}
 

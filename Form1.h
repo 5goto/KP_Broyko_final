@@ -944,7 +944,7 @@ private:
 			std::string tmp_genre;
 			MarshalString(genre, tmp_genre);
 
-			if (tmp_genre.size() == 0)
+			if (tmp_genre.size() == 0 || !simple_space_string_validator(tmp_genre))
 			{
 				MessageBox::Show("Поле Жанр не должно быть пустым", "Решение поисковой задачи");
 				return;
@@ -957,13 +957,15 @@ private:
 			if (res.size() != 0)
 			{
 				ResultWindow->ColumnCount = 1;
-				ResultWindow->RowCount = res.size();
+				ResultWindow->RowCount = res.size() + 1;
 
-				for (auto i = 0; i < res.size(); ++i)
+				auto i = 0;
+				for (i; i < res.size(); ++i)
 				{
-					ResultWindow->Rows[i]->Cells[0]->Value = res[i]->get_all_data_string() + "| Сравнения: " + comparisons;
+					ResultWindow->Rows[i]->Cells[0]->Value = res[i]->get_all_data_string()
+						+ "|" + day + "/" + mounth + "/" + year;
 				}
-
+				ResultWindow->Rows[i]->Cells[0]->Value = "Поиск завершен: Количество сравнений: " + comparisons;
 			}
 			else
 				MessageBox::Show("Результат отсутствует", "Задача поиска");
@@ -1015,11 +1017,18 @@ private:
 			tree_log_counter++;
 		}
 
-
-
-
 		MessageBox::Show("Вместимость таблицы: " + test.get_hash_table_size() + " записей", "Создание хэш таблицы");
 	}
+
+		private: bool simple_space_string_validator(std::string str)
+		{
+			for (auto item : str)
+			{
+				if (item != ' ')
+					return true;
+			}
+			return false;
+		}
 
 	private: System::Void dataGridView1_CellContentClick(System::Object^ sender, System::Windows::Forms::DataGridViewCellEventArgs^ e) {
 	}
@@ -1042,12 +1051,12 @@ private:
 			MarshalString(title, tmp_title);
 			MarshalString(genre, tmp_genre);
 
-			if (tmp_title.size() == 0)
+			if (tmp_title.size() == 0 || !simple_space_string_validator(tmp_title))
 			{
 				MessageBox::Show("Поле Название не может быть пустым", "Вставка в хэш-таблицу");
 				return;
 			}
-			if (tmp_genre.size() == 0)
+			if (tmp_genre.size() == 0 || !simple_space_string_validator(tmp_genre))
 			{
 				MessageBox::Show("Поле Жанр не должно быть пустым", "Вставка в хэш-таблицу");
 				return;
@@ -1104,12 +1113,12 @@ private:
 			std::string tmp_genre;
 			MarshalString(title, tmp_title);
 			MarshalString(genre, tmp_genre);
-			if (tmp_title.size() == 0)
+			if (tmp_title.size() == 0 || !simple_space_string_validator(tmp_title))
 			{
 				MessageBox::Show("Поле Название пустое! Введите данные", "Удаление из хэш-таблицы");
 				return;
 			}
-			if (tmp_genre.size() == 0)
+			if (tmp_genre.size() == 0 || !simple_space_string_validator(tmp_genre))
 			{
 				MessageBox::Show("Поле Жанр пустое! Введите данные", "Удаление из хэш-таблицы");
 				return;
@@ -1158,7 +1167,7 @@ private:
 			std::string tmp_name;
 			MarshalString(name, tmp_name);
 
-			if (tmp_name.size() == 0)
+			if (tmp_name.size() == 0 || !simple_space_string_validator(tmp_name))
 			{
 				MessageBox::Show("Поле Название пустое! Введите данные", "Вставка в дерево");
 				return;
@@ -1205,7 +1214,7 @@ private:
 			std::string tmp_name;
 			MarshalString(name, tmp_name);
 
-			if (tmp_name.size() == 0)
+			if (tmp_name.size() == 0 || !simple_space_string_validator(tmp_name))
 			{
 				MessageBox::Show("Поле Название пустое! Введите данные", "Удаление из дерева");
 				return;
@@ -1256,12 +1265,12 @@ private: System::Void HashTableSearch_Click(System::Object^ sender, System::Even
 		MarshalString(title, tmp_title);
 		MarshalString(genre, tmp_genre);
 
-		if (tmp_title.size() == 0)
+		if (tmp_title.size() == 0 || !simple_space_string_validator(tmp_title))
 		{
 			MessageBox::Show("Поле Название пустое! Введите данные", "Вставка в хэш-таблицу");
 			return;
 		}
-		if (tmp_genre.size() == 0)
+		if (tmp_genre.size() == 0 || !simple_space_string_validator(tmp_genre))
 		{
 			MessageBox::Show("Поле Жанр пустое! Введите данные", "Вставка в хэш-таблицу");
 			return;
@@ -1294,7 +1303,7 @@ private: System::Void TreeSearch_Click(System::Object^ sender, System::EventArgs
 		std::string tmp_name;
 		MarshalString(name, tmp_name);
 
-		if (tmp_name.size() == 0)
+		if (tmp_name.size() == 0 || !simple_space_string_validator(tmp_name))
 		{
 			MessageBox::Show("Поле Название пустое! Введите данные", "Удаление из дерева");
 			return;

@@ -100,19 +100,23 @@ public:
 	{ 
 		// здесь мы получаем узел, содержащий все объекты с интересующим нас статусом 
 		vector<Performance*> answer; // это вектор, в которыйь ответы
-		BTree<Production*>::node* production_with_good_date = production_data_base->search_wrap(new Production{ {day, mounth, year} }, comprassions); // (*)
-		
-			while (production_with_good_date != NULL) // просто последовательно идем по цепочке, как по односвязному списку
+		RingLinkList<Production*>::node* production_with_good_date = production_data_base->search_wrap(new Production{ {day, mounth, year} }, comprassions); // (*)
+		RingLinkList<Production*>::node* tmp_prod = production_with_good_date;
+
+		if (production_with_good_date != NULL)
+		{
+			do // просто последовательно идем по цепочке, как по односвязному списку
 			{ // получаем название Манги из очередного объекта Избранного, которые хранятся в том списке, который мы получили здесь (*)
-				Performance* tmp = performance_data_base->search_index(get_string_code(production_with_good_date->num->get_name())); // хэшируем по этому названию, смотрим есть ли такой объект в таблице
+				Performance* tmp = performance_data_base->search_index(get_string_code(production_with_good_date->data->get_name())); // хэшируем по этому названию, смотрим есть ли такой объект в таблице
 				if (tmp != NULL)  // если объект есть т.е. хэширование успешно
 				{
-					if (tmp->get_genre() == genre) 
-						answer.push_back(tmp); 
+					if (tmp->get_genre() == genre)
+						answer.push_back(tmp);
 				}
 				production_with_good_date = production_with_good_date->next; // движемся дальше по цепочке пока не пройдем ее всю
 				comprassions++;
-			}
+			} while (production_with_good_date != tmp_prod);
+		}
 			return answer;
 	}
 

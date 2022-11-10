@@ -104,6 +104,8 @@ public:
 		return date.day + 30 * date.mounth + 365 * date.year;
 	}
 
+
+
 	string get_name() { return name; }
 	date_type get_date() { return date; }
 	int get_day() { return date.day; }

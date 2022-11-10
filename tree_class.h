@@ -9,126 +9,514 @@
 using namespace std;
 
 
-//  объекты с одинаковым статусом хранятся в одном узле
-// каждый узел дерева как бы представляет собой голову односвзяного списка
-template<typename T>
+/////////////////////////////////////
+template <typename ListData>
+class RingLinkList
+{
+public:	struct node
+	{
+		ListData data;
+		node* pred;
+		node* next;
+
+		node(ListData data_) : data{ data_ }, pred{ nullptr }, next{ nullptr } {}
+	};
+
+	node* head;
+
+public:
+	RingLinkList() : head{ nullptr } {} // конструктор по умолчанию
+
+
+	bool is_it_empty() { return (head == nullptr) ? true : false; } // true если список пуст, false в противном случае
+
+	void push_back(ListData data) // добавление узла в конец двусвязного кольцевого списка
+	{ // true, если элемент был удален
+		if (head == nullptr) // список пуст
+		{
+			head = new node{ data };
+			head->next = head;
+			head->pred = head;
+		}
+		else // не пуст
+		{
+			node* new_unit = new node{ data };
+			head->pred->next = new_unit;
+
+			new_unit->pred = head->pred;
+			new_unit->next = head;
+
+			head->pred = new_unit;
+		}
+	}
+
+	bool delete_first_equal_element_by_data(ListData data) // удаление первого совпавшего элемента
+	{
+		if (head == nullptr) return false; // проверка наличия элементов в списке
+
+		node* search_tmp = head;
+		if (head->next == head) // проверка первого элемента
+		{
+			delete search_tmp;
+			head = nullptr;
+			return true;
+		}
+		else // случай, когда элементов несколько
+		{
+			if (*search_tmp->data == *data)
+			{
+				search_tmp->pred->next = search_tmp->next;
+				search_tmp->next->pred = search_tmp->pred;
+				head = search_tmp->next;
+				delete search_tmp;
+				return true;
+			}
+			search_tmp = search_tmp->next;
+
+			while (search_tmp != head)
+			{
+				if (*search_tmp->data == *data)
+				{
+					search_tmp->pred->next = search_tmp->next;
+					search_tmp->next->pred = search_tmp->pred;
+					delete search_tmp;
+					return true;
+				}
+				search_tmp = search_tmp->next;
+			}
+			return false;
+		}
+	}
+
+	bool search_first_element_by_data(ListData data) // поиск элемента, true - если элемент найден, false - в противном случае
+	{
+		if (*head->data == *data) // проверка первого элемента
+			return true;
+
+		node* search_tmp = head->next;
+
+		while (search_tmp != head) // проверка последующих элементов
+		{
+			if (*search_tmp->data == *data)
+				return true;
+			search_tmp = search_tmp->next;
+		}
+		return false;
+	}
+
+	void console_print()
+	{
+		if (head == nullptr)
+			cout << "Empty list" << endl;
+		else
+		{
+			node* print_tmp = head;
+			do {
+				cout << *print_tmp->data << "<>"; // << "pred: " << print_tmp->pred << "next: " << print_tmp->next << "///";
+				print_tmp = print_tmp->next;
+			} while (print_tmp != head);
+			//cout << endl;
+		}
+	}
+
+	auto get_all_nodes_data_string()
+	{
+		/*if (head == nullptr)
+			return "";
+		else*/
+		{
+			System::String^ str = "";
+			node* print_tmp = head;
+			do {
+				str += print_tmp->data->get_all_data_string() + "<>"; // << "pred: " << print_tmp->pred << "next: " << print_tmp->next << "///";
+				print_tmp = print_tmp->next;
+			} while (print_tmp != head);
+			//cout << endl;
+			return str;
+		}
+	}
+
+	auto get_head() { return head; }
+
+
+};
+//////////////////////////////////////////////////////////
+
+template<typename Tree_Data>
 class BTree
 {
+	//struct keys //ключ узла
+	//{
+	//	string letter;
+	//	int number;
+	//};
+	struct node // узел дерева 
+	{
+		int key; // ключ узла
+		RingLinkList<Tree_Data>* data; // вложенный двусвязный кольцевой список
+		int count;
+		int balance_factor;  // баланс фактор
+		node* left;
+		node* right;
+		// конструктор узла
+		node(int key_, Tree_Data new_data) : data{ new RingLinkList<Tree_Data> }, key{ key_ }, balance_factor{}, left{ nullptr }, right{ nullptr }
+		{
+			data->push_back(new_data);
+		}
+	};
 
-public:struct node // узел дерева
-{
-    node* left; 
-    node* right;
-    node* parent;
-    node* next; 
-    T num; // поля с данными
-    node(T n, node* l = 0, node* r = 0, node* p = 0, node* ne = 0) :num(n), left(l), right(r), parent(p), next(ne)
-    {
+	node* root;
+	bool* is_h_change;
 
-    }
-};
-private: 
-
-    node* root; // корень дерева
-
-
-    void insert(node* z, vector<int>* path) 
-    {                    
-        node* y = NULL;
-        node* x = root;
-        while (x != NULL)
-        {
-            path->push_back((int)(*x->num));
-            y = x;
-            if ((int)(*z->num) < (int)(*x->num))
-                x = x->left;
-            else if ((int)(*z->num) > (int)(*x->num))
-                x = x->right;
-            else // если ключи нового объекта и текущего равны -  вставляем его в нашу цепочку этого узла
-            {
-                node* tmp = x;
-                while (tmp->next != NULL)
-                    tmp = tmp->next;
-                tmp->next = z;
-                return;
-            }
-        }
-        z->parent = y;
-        if (y == NULL)
-            root = z;
-        else if ((int)(*z->num) < (int)(*y->num))
-            y->left = z;
-        else if ((int)(*z->num) > (int)(*y->num))
-            y->right = z;
-        else //спустились вниз дерева и ключи совпали
-        {
-            node* tmp = y;
-            while (tmp->next != NULL)
-                tmp = tmp->next;
-            tmp->next = z;
-        }
-    }
-
-    //void draw(node* p, int level = 3) { //отрисовка дерева, опрокинутого на бок, объеты в одной цепочке выводятся друг за другом
-    //    if (p != NULL) {
-    //        draw(p->right, level + 3);
-    //        for (int i = 0; i < level; i++) {
-    //            cout << " ";
-    //        }
-    //        if (p != NULL)
-    //        {
-    //            node* tmp = p;
-    //            while (tmp != NULL)
-    //            {
-    //                cout << *tmp->num << "<>";
-    //                tmp = tmp->next;
-    //            }
-    //            cout << endl;
-    //        }
-    //        draw(p->left, level + 3);
-    //    }
-    //}
-
-    void transplant(node* u, node* v) // вспомогательный метод для функции удаления 
-    {
-        if (u->parent == NULL)
-            root = v;
-        else if (u == u->parent->left)
-            u->parent->left = v;
-        else u->parent->right = v;
-        if (v != NULL)
-            v->parent = u->parent;
-    }
-
-    node* three_minimum(node* x) 
-    {
-        while (x->left != NULL)
-            x = x->left;
-        return x;
-    }
 public:
-    BTree() {// конструктор
-        root = NULL;
-    }
-
-    vector<int>* additem(T n) { // обертка для добавления элемента
-        vector<int>* path{ new vector<int> };
-        node* new_node = new node(n);
-        insert(new_node, path);
-        tree_function_keys.push_back(*path);
-        tree_function_objects_names.push_back(n->get_name());
-        return path;
-    }
+	BTree()
+	{
+		root = nullptr;
+		is_h_change = new bool{ false };
+	}
 
 
-    void draw_wrap() // обертка для отрисовки
-    {
-        node* head = root;
-        draw(head);
-    }
+
+	vector<int>* additem(Tree_Data data) { // обертка для добавления элемента
+		vector<int>* path{ new vector<int> };
+		virt_insert_search(data, root, path);
+		tree_function_keys.push_back(*path);
+		tree_function_objects_names.push_back(data->get_name());
+		return path;
+	}
+
+	void virt_insert_search(Tree_Data search_key, node*& current_pointer, vector<int>* path)
+	{
+		node* p1;
+		node* p2;
+		if (current_pointer == NULL)
+		{
+			current_pointer = new node{ (int)(*search_key), search_key }; // новый узел дерева
+
+			*is_h_change = true; // при изменении высоты поднимается следующий флаг
+		}
+		else if ((int)(*search_key) < current_pointer->key)
+		{
+			path->push_back(current_pointer->key);
+			virt_insert_search(search_key, current_pointer->left, path);
+			if (*is_h_change) // если выросла левая ветвь
+			{
+				if (current_pointer->balance_factor == 1)
+				{
+					current_pointer->balance_factor = 0;
+					*is_h_change = false;
+				}
+				else if (current_pointer->balance_factor == 0)
+					current_pointer->balance_factor = -1;
+				else
+				{
+					p1 = current_pointer->left;
+					if (p1->balance_factor == -1)
+					{
+						current_pointer->left = p1->right;
+						p1->right = current_pointer;
+						current_pointer->balance_factor = 0;
+						current_pointer = p1;
+					}
+					else
+					{
+						p2 = p1->right;
+						p1->right = p2->left;
+						p2->left = p1;
+						current_pointer->left = p2->right;
+						p2->right = current_pointer;
+						if (p2->balance_factor == -1)
+							current_pointer->balance_factor = 1;
+						else
+							current_pointer->balance_factor = 0;
+						if (p2->balance_factor == 1)
+							current_pointer->balance_factor = -1;
+						else
+							current_pointer->balance_factor = 0;
+						current_pointer = p2;
+					}
+					current_pointer->balance_factor = 0;
+					*is_h_change = false;
+				}
+			}
+		}
+		else if ((int)(*search_key) > current_pointer->key)
+		{
+			path->push_back(current_pointer->key);
+			virt_insert_search(search_key, current_pointer->right, path);
+			if (*is_h_change)
+			{
+				if (current_pointer->balance_factor == -1)
+				{
+					current_pointer->balance_factor = 0;
+					*is_h_change = false;
+				}
+				else if (current_pointer->balance_factor == 0)
+					current_pointer->balance_factor = 1;
+				else
+				{
+					p1 = current_pointer->right;
+					if (p1->balance_factor == 1)
+					{
+						current_pointer->right = p1->left;
+						p1->left = current_pointer;
+						current_pointer->balance_factor = 0;
+						current_pointer = p1;
+					}
+					else
+					{
+						p2 = p1->left;
+						p1->left = p2->right;
+						p2->right = p1;
+						current_pointer->right = p2->left;
+						p2->left = current_pointer;
+						if (p2->balance_factor == 1)
+							current_pointer->balance_factor = -1;
+						else
+							current_pointer->balance_factor = 0;
+						if (p2->balance_factor == -1)
+							current_pointer->balance_factor = 1;
+						else
+							current_pointer->balance_factor = 0;
+						current_pointer = p2;
+					}
+					current_pointer->balance_factor = 0;
+					*is_h_change = false;
+				}
+			}
+		}
+		else
+		{
+			current_pointer->data->push_back(search_key); // случай равенства ключей, увеличиваем счетчик
+			*is_h_change = false;
+		}
+	}
+
+	void balanceL(node*& p, bool* hight) // левый поворот
+	{
+		node* p1;
+		node* p2;
+		if (p->balance_factor == -1)
+			p->balance_factor = 0;
+		else if (p->balance_factor == 0)
+		{
+			p->balance_factor = 1;
+			*hight = false;
+		}
+		else
+		{
+			p1 = p->right;
+			if (p1->balance_factor >= 0)
+			{
+				p->right = p1->left;
+				p1->left = p;
+				if (p1->balance_factor == 0)
+				{
+					p->balance_factor = 1;
+					p1->balance_factor = -1;
+					*hight = false;
+				}
+				else
+				{
+					p->balance_factor = 0;
+					p1->balance_factor = 0;
+				}
+				p = p1;
+			}
+			else
+			{
+				p2 = p1->left;
+				p1->left = p2->right;
+				p2->right = p1;
+				p->right = p2->left;
+				p2->left = p;
+				if (p2->balance_factor == 1)
+					p->balance_factor = -1;
+				else
+					p->balance_factor = 0;
+				if (p2->balance_factor == -1)
+					p1->balance_factor = 1;
+				else
+					p1->balance_factor = 0;
+				p = p2;
+				p2->balance_factor = 0;
+			}
+		}
+	}
+
+	void balanceR(node*& p, bool* hight) // правый поворот
+	{
+		node* p1;
+		node* p2;
+		if (p->balance_factor == 1)
+			p->balance_factor = 0;
+		else if (p->balance_factor == 0)
+		{
+			p->balance_factor = -1;
+			*hight = false;
+		}
+		else
+		{
+			p1 = p->left;
+			if (p1->balance_factor <= 0)
+			{
+				p->left = p1->right;
+				p1->right = p;
+				if (p1->balance_factor == 0)
+				{
+					p->balance_factor = -1;
+					p1->balance_factor = 1;
+					*hight = false;
+				}
+				else
+				{
+					p->balance_factor = 0;
+					p1->balance_factor = 0;
+				}
+				p = p1;
+			}
+			else
+			{
+				p2 = p1->right;
+				p1->right = p2->left;
+				p2->left = p1;
+				p->left = p2->right;
+				p2->right = p;
+				if (p2->balance_factor == -1)
+					p->balance_factor = 1;
+				else
+					p->balance_factor = 0;
+				if (p2->balance_factor == 1)
+					p1->balance_factor = -1;
+				else
+					p1->balance_factor = 0;
+				p = p2;
+				p2->balance_factor = 0;
+			}
+		}
+	}
+
+	void del(node*& r, bool* hight, node*& q) // ??
+	{
+		if (r->left != NULL)
+		{
+			del(r->left, hight, q);
+			if (hight)
+				balanceR(r, hight);
+		}
+		else
+		{
+			q->key = r->key;
+			q->data = r->data;
+			q->count = r->count;
+			q = r;
+			r = r->right;
+			*hight = true;
+		}
+	}
+
+	bool delete_wrap(Tree_Data data)
+	{
+		return delete_from_tree(data, root, is_h_change);
+	}
+
+	bool delete_from_tree(Tree_Data data_to_delete, node*& current_node, bool* hight)
+	{
+		if (current_node == NULL)
+			return false;
+		else if ((int)(*data_to_delete) < current_node->key)
+		{
+			delete_from_tree(data_to_delete, current_node->left, hight);
+			if (*hight)
+				balanceL(current_node, hight);
+		}
+		else if ((int)(*data_to_delete) > current_node->key)
+		{
+			delete_from_tree(data_to_delete, current_node->right, hight);
+			if (*hight)
+				balanceR(current_node, hight);
+		}
+		else
+		{
+			if (current_node->data->delete_first_equal_element_by_data(data_to_delete))
+			{
+				if (!current_node->data->is_it_empty())
+					return true;
+				else
+				{
+					node* q = current_node;
+					if (q->right == NULL)
+					{
+						current_node = q->left;
+						*hight = true;
+					}
+					else if (q->left == NULL)
+					{
+						current_node = q->right;
+						*hight = true;
+					}
+					else
+					{
+						del(q->right, hight, q);
+						if (*hight)
+							balanceL(current_node, hight);
+					}
+					return true;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+	}
+
+	node* findmin(node* p) // поиск узла с минимальным ключом в дереве p 
+	{
+		return p->left ? findmin(p->left) : p;
+	}
+
+	node* findmax(node* ptr) // поиск максимального узла в поддереве
+	{
+		while (ptr->right != NULL)
+			ptr = ptr->right;
+		return ptr;
+	}
+
+public: auto tree_search(Tree_Data object)
+{
+	node* head = root;
+	if (head != NULL)
+	{
+		while (head != nullptr)
+		{
+			if (head->key == (int)(*object))
+			{
+				if (head->data->search_first_element_by_data(object))
+					return true;
+				else
+					return false;
+			}
+			else if (head->key < (int)(*object))
+				head = head->right;
+			else
+				head = head->left;
+		}
+	}
+	else
+		return false;
+}
 
 
-    private: void draw(node* p, System::Collections::Generic::LinkedList<System::String^>^ res, int level = 3) {
+	  public: auto draw_wrap_return()
+	  {
+		  node* head = root;
+		  auto items{ gcnew System::Collections::Generic::LinkedList<System::String^> };
+		  draw(head, items);
+		  return items;
+	  }
+
+	  private: void draw(node* p, System::Collections::Generic::LinkedList<System::String^>^ res, int level = 3) {
         if (p != NULL) {
             draw(p->right, res, level + 4);
             System::String^ space = "";
@@ -137,236 +525,83 @@ public:
             }
             if (p != NULL)
             {
-               node* tmp = p;
-               while (tmp != NULL)
-               {
-                   space += tmp->num->get_all_data_string() + " <-> ";
-                   tmp = tmp->next;
-               }
-               cout << endl;
+
+				space += p->data->get_all_nodes_data_string();
+			    cout << endl;
             }
             res->AddLast(space);
             draw(p->left, res, level + 4);
         }
     }
 
-    public: auto draw_wrap_return()
-    {
-        node* head = root;
-        auto items{ gcnew System::Collections::Generic::LinkedList<System::String^> };
-        draw(head, items);
-        return items;
-    }
-
-private: void delete_from_three(node* z)
-{
-    if (z->left == NULL)
-        transplant(z, z->right);
-    else if (z->right == NULL)
-        transplant(z, z->left);
-    else
-    {
-        node* y = three_minimum(z->right);
-        if (y->parent != z)
-        {
-            transplant(y, y->right);
-            y->right = z->right;
-            y->right->parent = y;
-        }
-        transplant(z, y);
-        y->left = z->left;
-        y->left->parent = y;
-    }
-}
-
-private: node* search(T data, node* x, int& comprassions) // поиск нужного узла в дереве
-{
-    while (x != NULL && ((int)(*data) != (int)(*x->num)))
-    {
-        comprassions++;
-        if ((int)(*data) < (int)(*x->num))
-            x = x->left;
-        else x = x->right;
-    }
-    return x;
-}
-
-private: node* search(T data, node* x) // поиск нужного узла в дереве
-{
-    while (x != NULL && ((int)(*data) != (int)(*x->num)))
-    {
-        if ((int)(*data) < (int)(*x->num))
-            x = x->left;
-        else x = x->right;
-    }
-    return x;
-}
-
-public: node* search_wrap(T data, int& comprassions) // обертка для фыункции поиска
-{
-    node* x = root;
-    return search(data, x, comprassions);
-}
-
-public: node* search_wrap(T data) // обертка для фыункции поиска
-{
-    node* x = root;
-    return search(data, x);
-}
-
-public: bool delete_wrap(T data) //  оберка удаления
-{
-    // поиск удаляемого элемента в дереве - если его нет - то ничего не происходит
-    // если элемент существует, то 
-    node* to_delete = search_wrap(data); // ищем цепочку с таким же статусом как в data
-    if (to_delete != NULL) // если цепочка существует
-    {
-        if (to_delete->next == NULL && *to_delete->num == *data) // если цепочка состоит из одного элемента и он совпадает с искомым для удаления
-        {
-            delete_from_three(to_delete);  // удаляем его
-            return true;
-        }
-        else 
-            if (to_delete->next != NULL) // если цепочка состоит из > 1 элементов
-        {
-            if (*to_delete->num == *data)  // если искомый элемент стоит первым в цепочке
-            {
-                node* tmp = to_delete;
-                if (tmp->parent != NULL) // если у цепочки существует родитель (не является корнем)
-                {
-                    tmp->next->parent = tmp->parent; // перепривязываем узел
-                    if (tmp->parent->right == tmp)
-                        tmp->parent->right = tmp->next;
-                    else
-                        tmp->parent->left = tmp->next;
-                }
-                else
-                    root = tmp->next;
-                if (tmp->left != NULL) // если существует левый потомок
-                {
-                    tmp->next->left = tmp->left;  // перепривязываем узел на следующий
-                    tmp->left->parent = tmp->next;
-                }
-                if (tmp->right != NULL) // если существует правый потомок
-                {
-                    tmp->next->right = tmp->right;  // перепривязываем узел на следующий
-                    tmp->right->parent = tmp->next;
-                }
-                delete tmp; // наконец удаляем искомый узел
-                return true;
-            }
-            else // если искомый узел не первый, но возможно он есть в цепочке узла
-            {
-                node* tmp = to_delete;
-                while (tmp != NULL) // ищем элемент в цепочке простым перебором узлов
-                {
-                    if (*tmp->next->num == *data)
-                        break;
-                    else
-                        tmp = tmp->next;
-                }
-                if (tmp != NULL) // если элемент не равен NULL -> удаляемый элемент найден и является следующим за tmp
-                {
-                    node* second_tmp = tmp->next; // удаляем этот элемент как из простого односвязного списка
-                    tmp->next = second_tmp->next;
-                    delete second_tmp;
-                    return true;
-                }
-                else
-                    return false;
-            }
-        }
-        else
-            return false;
-    }
-    else
-        return false;
-}
-
-public:auto delete_all_same_objects_from_tree(T object) // удаление всех одинаковых объектов - понадобится позже
-{
-    int counter{};
-    while (delete_wrap(object))
-    {
-        counter++;
-    }
-    return counter;
-}
-
-
-private: void searchOrderTravers(node* head, string name, vector<T>* res) // прямой обход (1)
-{
-    if (head != NULL)
-    {
-        node* tmp = head;
-        while (tmp != NULL)
-        {
-            if (tmp->num->get_name() == name)
-                res->push_back(tmp->num);
-            tmp = tmp->next;
-        }
-        searchOrderTravers(head->left, name, res);
-        searchOrderTravers(head->right, name, res);
-    }
-}
-
-public:  auto searchOrderTraversWrapper(string name)
-{
-    node* head = root;
-    vector<T>* result{ new vector<T> };
-    searchOrderTravers(head, name, result);
-    return result;
-}
-
-      private:void sortOrderTravers(node* head, vector<T>* res) // обход с выводом в отсортированном порядке (Центрированный)
-      {
-          if (head != NULL)
-          {
-              sortOrderTravers(head->left, res);
-              node* tmp = head;
-              while (tmp != NULL)
-              {
-                  res->push_back(tmp->num);
-                  tmp = tmp->next;
-              }
-              sortOrderTravers(head->right, res);
-          }
-      }
-
-    public: auto tree_search(T object)
+	public:  auto searchOrderTraversWrapper(string name)
 	{
 		node* head = root;
-		if (head != NULL)
-		{
-			while (head != nullptr)
-			{
-                if (head->num->get_date() == object->get_date())
-                {
-                    node* tmp = head;
-                    while (tmp != nullptr)
-                    {
-                        if (*tmp->num == *object)
-                            return true;
-                        else
-                            tmp = tmp->next;
-                    }
-                    return false;
-                }
-				else if (*head->num < *object)
-					head = head->right;
-				else
-					head = head->left;
-			}
-		}
-		else
-			return false;
+		vector<Tree_Data>* result{ new vector<Tree_Data> };
+		searchOrderTravers(head, name, result);
+		return result;
 	}
 
-     public: vector<T>*& get_all_items()
-      {
-          node* head = root;
-          vector<T>* items{ new vector<T> };
-          sortOrderTravers(head, items);
-          return items;
-      }
+	private: void searchOrderTravers(node* head, string name, vector<Tree_Data>* res) // прямой обход (1)
+	{
+		if (head != NULL)
+		{
+			RingLinkList<Production*>::node* tmp = head->data->get_head();
+			RingLinkList<Production*>::node* search_tmp = tmp;
+			do
+			{
+				if (tmp->data->get_name() == name)
+					res->push_back(tmp->data);
+				tmp = tmp->next;
+			} while (tmp != search_tmp);
+			searchOrderTravers(head->left, name, res);
+			searchOrderTravers(head->right, name, res);
+		}
+	}
+
+	public: RingLinkList<Production*>::node* search_wrap(Tree_Data data, int& comprassions) // обертка для фыункции поиска
+	{
+		node* x = root;
+		return search(data, x, comprassions);
+	}
+
+	private: RingLinkList<Production*>::node* search(Tree_Data data, node* current_node, int& comprassions) // поиск нужного узла в дереве
+	{
+		comprassions++;
+		while (current_node != NULL && ((int)(*data) != current_node->key))
+		{
+			comprassions++;
+			if ((int)(*data) < current_node->key)
+				current_node = current_node->left;
+			else current_node = current_node->right;
+		}
+		if (current_node != NULL)
+			return current_node->data->get_head();
+		else
+			return NULL;
+	}
+
+	public: vector<Tree_Data>*& get_all_items()
+	{
+		node* head = root;
+		vector<Tree_Data>* items{ new vector<Tree_Data> };
+		sortOrderTravers(head, items);
+		return items;
+	}
+	
+	private:void sortOrderTravers(node* head, vector<Tree_Data>* res) // обход с выводом в отсортированном порядке (Центрированный)
+	{
+		if (head != NULL)
+		{
+			sortOrderTravers(head->left, res);
+			RingLinkList<Production*>::node* tmp = head->data->get_head();
+			RingLinkList<Production*>::node* search_tmp = tmp;
+			do
+			{
+				res->push_back(tmp->data);
+				tmp = tmp->next;
+			} while (tmp != search_tmp);
+			sortOrderTravers(head->right, res);
+		}
+	}
 };
